@@ -23,7 +23,7 @@
   - A Newick formatted phylogenetic tree (.nwk)
   - Output Filename
   - Genetic Distance Threshold
-    - Note: using the distance-free method this threshold is used as the upper bound of possible thresholds to compute.
+    - Note: When using the distance-free method this threshold is used as the upper bound of possible thresholds to compute.
 
   **Optional Parameters:**
   - 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
