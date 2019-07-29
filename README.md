@@ -13,8 +13,8 @@
 
 ## Usage
 
-  1. Clone or download this repository
-  2. Ensure that all dependencies are installed (see below)
+  1. Clone or download this repository.
+  2. Ensure that all dependencies are installed (see below).
   3. Run using one of the following terminal commands:
   - `./TransmissionCluster.py`
   - `python3 TransmissionCluster.py`
@@ -28,8 +28,8 @@
   **Optional Parameters:**
   - 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
   - Posterior/Bootstrap Support Threshold
-  - Pairwise Distance File (TransmissionCluster will generate an edge list to graph clusters when a distance file is provided)
-    - *See documentation for details and formatting requirements*
+  - Pairwise Distance File (TransmissionCluster will generate an edge list to graph clusters when a distance file is provided.)
+    - *See documentation for details and formatting requirements.*
 
 
 ## Screenshots
@@ -45,4 +45,4 @@
 
 
 #### Acknowledgements
-TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster)
+TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster).
