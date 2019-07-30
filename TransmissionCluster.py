@@ -104,6 +104,7 @@ def argmax_clusters(method, tree, threshold, support):
         distfile.write("%s\t%s\n" % (t, num_non_singleton))
         if num_non_singleton > best_num:
             best = clusters; best_num = num_non_singleton; best_t = t
+    outfile.write("Genetic Distance Uperbound: %f\n" % threshold)
     outfile.write("Best Distance Threshold: %f\n" % best_t)
     distfile.close()
     return best
@@ -233,6 +234,7 @@ if __name__ == "__main__":
     outfile.write("Support Threshold: %s\n" % values['support'])
     for t, tree in enumerate(trees):
         if values['df'] is False:
+            outfile.write("Genetic Distance Threshold: %s\n" % values['dist'])
             clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
         else:
             clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(values['dist']), float(values['support']))
