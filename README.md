@@ -32,6 +32,9 @@
   - Plot Pairwise Distance Histogram
 
 
+## Screenshots
+![Screenshot](./resources/s1.png)
+
 ## Dependencies
   * [Python 3](https://www.python.org/downloads/)
   * [TreeSwift](https://github.com/niemasd/TreeSwift)
