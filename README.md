@@ -10,7 +10,7 @@
   For a tree with *n* samples, the algorithm is O(*n*).
 
   >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*).
-
+  The upper limit *d* can be determined by plotting a histogram of pairwise distances and selecting the maximum distance that represents upper end of the distribution of within subtype pairwise-distance versus between subtype distances.(feature to be added soon)
 
 ## Usage
 
