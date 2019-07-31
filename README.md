@@ -32,10 +32,6 @@
     - *See documentation for details and formatting requirements.*
 
 
-## Screenshots
-  ![s1](./resources/s1.png)
-
-
 ## Dependencies
   * [Python 3](https://www.python.org/downloads/)
   * [TreeSwift](https://github.com/niemasd/TreeSwift)
