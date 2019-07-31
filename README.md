@@ -9,7 +9,8 @@
 
   For a tree with *n* samples, the algorithm is O(*n*).
 
-  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*). In practice, one may choose to set the upper limit *d* to the average distance between the two closest related subtypes in the tree. For example, in HCV, *d* could be set to the genetic distance between viral subtype 1a and 1b, computing the best threshold up to that distance.
+  >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*).
+
 
 ## Usage
 
@@ -40,5 +41,5 @@
     - Install via command line using: `pip install pysimplegui`
 
 
-#### Acknowledgements
+### Acknowledgements
 TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster).
