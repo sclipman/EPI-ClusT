@@ -3,6 +3,8 @@ from queue import Queue
 from treeswift import read_tree_newick
 import PySimpleGUI as sg
 import os
+import matplotlib.pyplot as plt
+import math
 NUM_THRESH = 1000  # number of thresholds for the threshold-free methods to use
 
 
@@ -110,6 +112,45 @@ def argmax_clusters(method, tree, threshold, support):
     return best
 
 
+def gen_hist(tree, display_fig):
+    histfile = open("data_pairwise_distances_histogram.txt",'w')
+    pw_dists = []
+    distance_matrix = tree.distance_matrix(leaf_labels = True)
+    for u in distance_matrix.keys():
+        for v in distance_matrix[u].keys():
+            pw_dists.append(distance_matrix[u][v])
+            histfile.write("%s\t%s\t%s\n" % (u, v, distance_matrix[u][v]))
+
+    bin_size = int(math.ceil(math.sqrt(len(pw_dists)) / 10.0)) * 10
+    plt.hist(pw_dists, bins = bin_size)
+    plt.ylabel('Count'); plt.xlabel('Genetic Distance')
+    if display_fig is True:
+        plt.show()
+    histarray = plt.hist(pw_dists, bins = bin_size)[0]
+    binsarray = plt.hist(pw_dists, bins = bin_size)[1]
+    histfile.close()
+    return histarray, binsarray
+
+
+# get upper limit for computing genetic distance thresholds
+def getD(hp):
+    histarray = hp[0]
+    binsarray = hp[1]
+    zerodic = {}
+    for i in range(len(histarray)):
+        if int(histarray[i]) == 0:
+            zerodic[i] = 1
+            if i >= 1:
+                j = i-1
+                if j in zerodic and zerodic[j] >= 1:
+                    zerodic[i] = zerodic[j] + 1
+
+    m = int(max(zerodic, key=zerodic.get))
+    n = m - zerodic[m] + 1
+    d = round(binsarray[n],4)
+    return float(d)
+
+
 # generate edge list to visualize clusters in gephi
 def generateEdgeList(distfilename, logfilename):
     outname = "network_diagram_edge_list.txt"
@@ -202,9 +243,9 @@ if __name__ == "__main__":
     layout = [ [sg.Image('resources/logo.png')],
                 [sg.Text('Newick Tree File:', font=('Helvetica 12')), sg.InputText(key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
                 [sg.Text('Output Filename:', font=('Helvetica 12')), sg.InputText(key='outfilename')],
-                [sg.Text('Genetic Distance Threshold:', font=('Helvetica 12')), sg.InputText(key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
+                [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
                 [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='support')],
-                [sg.Text('Pairwise distance file (optional, see documentation):', font=('Helvetica 12')), sg.InputText(key = 'distfile'), sg.FileBrowse(font=('Helvetica 12'))],
+                [sg.Checkbox('Plot Pairwise Distance Histogram', font=('Helvetica 12'), default=False,key='plothist')],
                 [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
 
     window = sg.Window('TransmissionCluster', layout)
@@ -233,11 +274,17 @@ if __name__ == "__main__":
     outfile.write("Input File: %s\n" % values['infilename'])
     outfile.write("Support Threshold: %s\n" % values['support'])
     for t, tree in enumerate(trees):
+        # plot pairwise distances
+        visable = False
+        if values['plothist'] is True:
+            visable = True
         if values['df'] is False:
             outfile.write("Genetic Distance Threshold: %s\n" % values['dist'])
             clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
         else:
-            clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(values['dist']), float(values['support']))
+            histarray = gen_hist(tree, visable)
+            d = getD(histarray)
+            clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(d), float(values['support']))
         cluster_num = 1
         clust_members = {}
         for cluster in clusters:
@@ -260,7 +307,5 @@ if __name__ == "__main__":
             outfile.write("%s\t%s\t[%s]\n" % (k, len(clust_members[k]), (','.join(clust_members[k]))))
     outfile.close()
 
-    if values['distfile'] != '':
-        generateEdgeList(values['distfile'], values['outfilename'])
 
     sg.PopupOK('Process Complete!\nResults have been written to the output file.')

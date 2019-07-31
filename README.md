@@ -1,4 +1,4 @@
-# TransmissionCluster
+# TransmissionCluster (Beta)
   TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
 
   Given a Newick (.nwk) formatted tree, genetic distance threshold *d*, and an optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
@@ -10,7 +10,7 @@
   For a tree with *n* samples, the algorithm is O(*n*).
 
   >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*).
-  The upper limit *d* can be determined by plotting a histogram of pairwise distances and selecting the maximum distance that represents upper end of the distribution of within subtype pairwise-distance versus between subtype distances.(feature to be added soon)
+  The upper limit *d* is determined by plotting a histogram of pairwise distances and selecting the maximum distance that represents upper end of the distribution of within subtype pairwise-distance versus between subtype distances.
 
 ## Usage
 
@@ -23,14 +23,13 @@
   **Required Parameters:**
   - A Newick formatted phylogenetic tree (.nwk)
   - Output Filename
-  - Genetic Distance Threshold
     - Note: When using the distance-free method this threshold is used as the upper bound of possible thresholds to compute.
 
   **Optional Parameters:**
-  - 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
+  - Genetic Distance Threshold
+    - Specify a threshold or select 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
   - Posterior/Bootstrap Support Threshold
-  - Pairwise Distance File (TransmissionCluster will generate an edge list to graph clusters when a distance file is provided.)
-    - *See documentation for details and formatting requirements.*
+  - Plot Pairwise Distance Histogram
 
 
 ## Dependencies
