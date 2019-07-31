@@ -35,9 +35,11 @@
 ## Dependencies
   * [Python 3](https://www.python.org/downloads/)
   * [TreeSwift](https://github.com/niemasd/TreeSwift)
-    - Install via command line using: `pip install treeswift`
+    - Install via pip: `pip install treeswift`
   * [PySimpleGUI](https://pypi.org/project/PySimpleGUI/)
-    - Install via command line using: `pip install pysimplegui`
+    - Install via pip: `pip install pysimplegui`
+  * Matplotlib
+    - Install via pip: `pip install matplotlib`
 
 
 ### Acknowledgements
