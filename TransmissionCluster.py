@@ -92,43 +92,57 @@ def min_clusters_threshold_max_clade(tree, threshold, support):
 
 
 # pick the threshold between 0 and "distance threshold" that maximizes number of (non-singleton) clusters
-def argmax_clusters(method, tree, threshold, support):
-    distfile = open("distance_permutations.txt", 'w')
-    distfile.write("Distance\tNumClusters\n")
+def argmax_clusters(method, tree, threshold, support, display_fig):
+    if display_fig is True:
+        distfile = open("TransmissionCluster_PlotData_NumClusters_by_DistanceThreshold.txt", 'w')
+        distfile.write("Distance\tNumClusters\n")
     from copy import deepcopy
-    assert threshold > 0, "Threshold must be positive"
     thresholds = [i*threshold/NUM_THRESH for i in range(NUM_THRESH+1)]
     best = None; best_num = -1; best_t = -1
+    distv = []
     for i, t in enumerate(thresholds):
         sg.OneLineProgressMeter('TransmissionCluster', i+1, len(thresholds)-1, 'key', 'Computing best genetic distance threshold...', orientation='h')
         clusters = method(deepcopy(tree), t, support)
         num_non_singleton = len([c for c in clusters if len(c) > 1])
-        distfile.write("%s\t%s\n" % (t, num_non_singleton))
+        if display_fig is True:
+            distfile.write("%s\t%s\n" % (t, num_non_singleton))
+        distv.extend([t]*num_non_singleton)
         if num_non_singleton > best_num:
             best = clusters; best_num = num_non_singleton; best_t = t
     outfile.write("Genetic Distance Uperbound: %f\n" % threshold)
     outfile.write("Best Distance Threshold: %f\n" % best_t)
-    distfile.close()
+
+    if display_fig is True:
+        distfile.close()
+        bin_size = round(math.sqrt(len(distv)))
+        plt.figure(2)
+        plt.hist(distv, bins = bin_size)
+        plt.ylabel('Number of Clusters'); plt.xlabel('Genetic Distance Threshold')
+
+
+
     return best
 
 
 def gen_hist(tree, display_fig):
-    histfile = open("data_pairwise_distances_histogram.txt",'w')
+    if display_fig is True:
+        histfile = open("TransmissionCluster_PlotData_Pairwise_Distance_Histogram.txt",'w')
     pw_dists = []
     distance_matrix = tree.distance_matrix(leaf_labels = True)
     for u in distance_matrix.keys():
         for v in distance_matrix[u].keys():
             pw_dists.append(distance_matrix[u][v])
-            histfile.write("%s\t%s\t%s\n" % (u, v, distance_matrix[u][v]))
+            if display_fig is True:
+                histfile.write("%s\t%s\t%s\n" % (u, v, distance_matrix[u][v]))
 
     bin_size = int(math.ceil(math.sqrt(len(pw_dists)) / 10.0)) * 10
+    plt.figure(1)
     plt.hist(pw_dists, bins = bin_size)
-    plt.ylabel('Count'); plt.xlabel('Genetic Distance')
-    if display_fig is True:
-        plt.show()
+    plt.ylabel('Count'); plt.xlabel('Sample Pairwise Genetic Distance')
     histarray = plt.hist(pw_dists, bins = bin_size)[0]
     binsarray = plt.hist(pw_dists, bins = bin_size)[1]
-    histfile.close()
+    if display_fig is True:
+        histfile.close()
     return histarray, binsarray
 
 
@@ -146,7 +160,7 @@ def getD(hp):
                     zerodic[i] = zerodic[j] + 1
 
     m = int(max(zerodic, key=zerodic.get))
-    n = m - zerodic[m] + 1
+    n = m - zerodic[m]
     d = round(binsarray[n],4)
     return float(d)
 
@@ -242,10 +256,10 @@ if __name__ == "__main__":
     #GUI
     layout = [ [sg.Image('resources/logo.png')],
                 [sg.Text('Newick Tree File:', font=('Helvetica 12')), sg.InputText(key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
-                [sg.Text('Output Filename:', font=('Helvetica 12')), sg.InputText(key='outfilename')],
+                [sg.Text('Output Filename:', font=('Helvetica 12')), sg.InputText(default_text='TransmissionCluster_Results.txt', key='outfilename')],
                 [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
                 [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='support')],
-                [sg.Checkbox('Plot Pairwise Distance Histogram', font=('Helvetica 12'), default=False,key='plothist')],
+                [sg.Checkbox('Plot Histograms', font=('Helvetica 12'), default=False,key='plothist')],
                 [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
 
     window = sg.Window('TransmissionCluster', layout)
@@ -284,7 +298,7 @@ if __name__ == "__main__":
         else:
             histarray = gen_hist(tree, visable)
             d = getD(histarray)
-            clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(d), float(values['support']))
+            clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
         cluster_num = 1
         clust_members = {}
         for cluster in clusters:
@@ -306,6 +320,7 @@ if __name__ == "__main__":
         for k in clust_members.keys():
             outfile.write("%s\t%s\t[%s]\n" % (k, len(clust_members[k]), (','.join(clust_members[k]))))
     outfile.close()
-
+    if visable is True:
+        plt.show()
 
     sg.PopupOK('Process Complete!\nResults have been written to the output file.')
