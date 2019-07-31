@@ -1,5 +1,5 @@
 # TransmissionCluster
-  TransmissionCluster is a GUI Python program that identifies disease transmission clusters using a distance-free tree-based approach.
+  TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
 
   Given a Newick (.nwk) formatted tree, genetic distance threshold *d*, and an optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
 
@@ -9,7 +9,7 @@
 
   For a tree with *n* samples, the algorithm is O(*n*).
 
-  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*). In practice, one may choose to set the upper limit *d* to the average distance between the two closest related subtypes in the tree. For example, in HCV, *d* could be set to the genetic distance between viral subtype 1a and 1b, computing the best threshold up to that distance. 
+  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*). In practice, one may choose to set the upper limit *d* to the average distance between the two closest related subtypes in the tree. For example, in HCV, *d* could be set to the genetic distance between viral subtype 1a and 1b, computing the best threshold up to that distance.
 
 ## Usage
 
