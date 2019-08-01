@@ -284,13 +284,15 @@ if __name__ == "__main__":
     while passingfile is False or passingdist is False or passingsupp is False:
         if window != '':
             window.Close()
-        layout = [#[sg.Image('resources/logo.png')],
-                    [sg.Text('Newick Tree File:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), key='infilename'), sg.FileBrowse(font=('Helvetica 13'))],
-                    [sg.Text('Output Filename:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
+        layout = [#[sg.Image(r'resources/logo.png')],
+                    [sg.Text("TransmissionCluster", font=('Helvetica', 24, 'bold'))],
+                    [sg.Text("Written By: Steven J. Clipman, Johns Hopkins University\n", font=('Helvetica', 14))],
+                    [sg.Text('Newick Tree File*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), key='infilename'), sg.FileBrowse(font=('Helvetica 13'))],
+                    [sg.Text('Output Filename*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
                     [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
                     [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=False, key='plothist')],
-                    [sg.OK('Analyze', font=('Helvetica 13'))]]
+                    [sg.OK('Analyze', font=('Helvetica', 13), size=(10, 2))]]
 
         window = sg.Window('TransmissionCluster', layout)
         event, values = window.Read()

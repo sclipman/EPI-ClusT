@@ -1,2 +1,5 @@
 dev
 venv
+build
+__pycache__
+TransmissionCluster.spec
