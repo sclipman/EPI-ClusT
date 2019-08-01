@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+
+###############################################################################
+# Program: TransmissionCluster.py
+# Type: Python Script
+# Version: 1.0
+# Author: Steven J. Clipman
+# Description: Efficient distance-free method for defining clusters from phylogenetic trees
+# License: MIT
+###############################################################################
+
 from queue import Queue
 from treeswift import read_tree_newick
 import PySimpleGUI as sg
@@ -7,20 +17,22 @@ import matplotlib.pyplot as plt
 import math
 import statistics
 
-
 NUM_THRESH = 1000  # number of thresholds to calculate genetic distance over
 
 
 # cut out the current node's subtree (by setting all nodes' DELETED to True) and return list of leaves
 def cut(node):
     cluster = list()
-    descendants = Queue(); descendants.put(node)
+    descendants = Queue()
+    descendants.put(node)
     while not descendants.empty():
         descendant = descendants.get()
         if descendant.DELETED:
             continue
         descendant.DELETED = True
-        descendant.left_dist = 0; descendant.right_dist = 0; descendant.edge_length = 0
+        descendant.left_dist = 0
+        descendant.right_dist = 0
+        descendant.edge_length = 0
         if descendant.is_leaf():
             cluster.append(str(descendant))
         else:
@@ -31,7 +43,8 @@ def cut(node):
 
 # initialize properties of input tree and return set containing taxa of leaves
 def prep(tree, support):
-    tree.resolve_polytomies(); tree.suppress_unifurcations()
+    tree.resolve_polytomies()
+    tree.suppress_unifurcations()
     leaves = set()
     for node in tree.traverse_postorder():
         if node.edge_length is None:
@@ -60,19 +73,21 @@ def min_clusters_threshold_max_clade(tree, threshold, support):
 
         # find my undeleted max distances to leaf
         if node.is_leaf():
-            node.left_dist = 0; node.right_dist = 0
+            node.left_dist = 0
+            node.right_dist = 0
         else:
             children = list(node.children)
             if children[0].DELETED and children[1].DELETED:
-                cut(node); continue
+                cut(node)
+                continue
             if children[0].DELETED:
                 node.left_dist = 0
             else:
-                node.left_dist = max(children[0].left_dist,children[0].right_dist) + children[0].edge_length
+                node.left_dist = max(children[0].left_dist, children[0].right_dist) + children[0].edge_length
             if children[1].DELETED:
                 node.right_dist = 0
             else:
-                node.right_dist = max(children[1].left_dist,children[1].right_dist) + children[1].edge_length
+                node.right_dist = max(children[1].left_dist, children[1].right_dist) + children[1].edge_length
 
             # if my kids are screwing things up, cut both
             if node.left_dist + node.right_dist > threshold:
@@ -82,7 +97,7 @@ def min_clusters_threshold_max_clade(tree, threshold, support):
                 node.right_dist = 0
 
                 # add cluster
-                for cluster in (cluster_l,cluster_r):
+                for cluster in (cluster_l, cluster_r):
                     if len(cluster) != 0:
                         clusters.append(cluster)
                         for leaf in cluster:
@@ -101,7 +116,9 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
         distfile.write("Distance\tNumClusters\n")
     from copy import deepcopy
     thresholds = [i*threshold/NUM_THRESH for i in range(NUM_THRESH+1)]
-    best = None; best_num = -1; best_t = -1
+    best = None
+    best_num = -1
+    best_t = -1
     distv = []
     for i, t in enumerate(thresholds):
         sg.OneLineProgressMeter('TransmissionCluster', i+1, len(thresholds)-1, 'key', 'Computing best genetic distance threshold...', orientation='h')
@@ -111,7 +128,9 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
             distfile.write("%s\t%s\n" % (t, num_non_singleton))
         distv.extend([t]*num_non_singleton)
         if num_non_singleton > best_num:
-            best = clusters; best_num = num_non_singleton; best_t = round(t,3)
+            best = clusters
+            best_num = num_non_singleton
+            best_t = round(t, 3)
     outfile.write("Genetic Distance Uperbound: %f\n" % threshold)
     outfile.write("Best Distance Threshold: %f\n" % best_t)
 
@@ -162,7 +181,7 @@ def get_dist_limit(hist_plot):
         if statistics.mean(curSet) < meanff:
             maxarray.append(binsarray[i])
 
-    d = round(float(maxarray[1]),3)
+    d = round(float(maxarray[1]), 3)
 
     return d
 
@@ -183,11 +202,10 @@ def generateEdgeList(distfilename, logfilename):
     while dline[:5] != 'Table':
         data = dline.split()
         id = data[0] + '-' + data[1]
-        distdic[id]=data[2]
+        distdic[id] = data[2]
         dline = distfile.readline()
 
     distfile.close()
-
 
     line = logfile.readline()
     while line != 'ClusterNum\tNumberOfSamples\tSampleNames\n':
@@ -218,21 +236,21 @@ def generateEdgeList(distfilename, logfilename):
     logfile.close()
     outfile.close()
 
-    rawedgelist = open(outname,'r')
+    rawedgelist = open(outname, 'r')
     newoutname = outname + "_filtered"
-    newout = open(newoutname,'w')
+    newout = open(newoutname, 'w')
     newout.write("Source\tTarget\n")
     line = rawedgelist.readline()
     cdic = {}
     while line != '':
         data = line.split()
-        if len(data)==2:
+        if len(data) == 2:
             newout.write(line)
         else:
             id1 = data[0]
             id2 = data[1]
             dist = float(data[2])
-            infocols = [id2,dist]
+            infocols = [id2, dist]
             if id1 not in cdic:
                 cdic[id1] = infocols
             else:
@@ -255,19 +273,19 @@ def generateEdgeList(distfilename, logfilename):
 
 
 if __name__ == "__main__":
-    #Render GUI window
+    # Render GUI window
     passing = False
     window = ''
     while passing is not True:
         if window != '':
             window.Close()
-        layout = [ [sg.Image('resources/logo.png')],
-                    [sg.Text('Newick Tree File:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
-                    [sg.Text('Output Filename:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
-                    [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
-                    [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='support')],
-                    [sg.Checkbox('Plot Histograms', font=('Helvetica 12'), default=False,key='plothist')],
-                    [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
+        layout = [[sg.Image('resources/logo.png')],
+                    [sg.Text('Newick Tree File:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), key='infilename'), sg.FileBrowse(font=('Helvetica 13'))],
+                    [sg.Text('Output Filename:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
+                    [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
+                    [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
+                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=False, key='plothist')],
+                    [sg.OK('Analyze', font=('Helvetica 13'))]]
 
         window = sg.Window('TransmissionCluster', layout)
         event, values = window.Read()
@@ -276,13 +294,13 @@ if __name__ == "__main__":
         try:
             float(values['dist'])
             if float(values['dist']) > 1 or float(values['dist']) < 0:
-                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
                 passing = False
             else:
                 passing = True
         except ValueError:
             if values['df'] is not True:
-                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
                 passing = False
             else:
                 passing = True
@@ -291,20 +309,19 @@ if __name__ == "__main__":
             try:
                 float(values['support'])
                 if float(values['support']) > 1 or float(values['support']) < 0:
-                    sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                    sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
                     passing = False
                 else:
                     passing = True
             except ValueError:
-                sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
                 passing = False
         else:
             passing = True
 
         if os.path.exists(values['infilename']) is not True:
-            sg.Popup("Error: Input tree not found.", font=('Helvetica', 12, 'bold'))
+            sg.Popup("Error: Input tree not found.", font=('Helvetica', 13, 'bold'))
             passing = False
-
 
     infile = open(values['infilename'], 'r')
     outfile = open(values['outfilename'], 'w')
@@ -359,7 +376,7 @@ if __name__ == "__main__":
     outfile.close()
     sg.PopupOK('Process Complete!',
         'Results have been written to the output file:\n%s' % values['outfilename'],
-        'Plots will now be displayed (if option checked)...', font=('Helvetica', 12))
+        'Plots will now be displayed (if option checked)...', font=('Helvetica', 13))
 
     if visable is True:
         plt.show()
