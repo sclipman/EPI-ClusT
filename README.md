@@ -52,4 +52,4 @@
 
 
 ### Acknowledgements
-TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster).
+TransmissionCluster utilizes the "Max Clade" algorithm from [TreeCluster](https://github.com/niemasd/TreeCluster).
