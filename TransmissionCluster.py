@@ -5,11 +5,10 @@ import PySimpleGUI as sg
 import os
 import matplotlib.pyplot as plt
 import math
-import numpy as np
 import statistics
 
 
-NUM_THRESH = 1000  # number of thresholds for the threshold-free methods to use
+NUM_THRESH = 1000  # number of thresholds to calculate genetic distance over
 
 
 # cut out the current node's subtree (by setting all nodes' DELETED to True) and return list of leaves
@@ -127,6 +126,7 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
     return best
 
 
+# plot distance histogram
 def gen_hist(tree, display_fig):
     if display_fig is True:
         histfile = open("TransmissionCluster_PlotData_Pairwise_Distance_Histogram.txt", 'w')
@@ -256,22 +256,51 @@ def generateEdgeList(distfilename, logfilename):
 
 if __name__ == "__main__":
     #Render GUI window
-    layout = [ [sg.Image('resources/logo.png')],
-                [sg.Text('Newick Tree File:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
-                [sg.Text('Output Filename:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
-                [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
-                [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='support')],
-                [sg.Checkbox('Plot Histograms', font=('Helvetica 12'), default=False,key='plothist')],
-                [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
+    passing = False
+    window = ''
+    while passing is not True:
+        if window != '':
+            window.Close()
+        layout = [ [sg.Image('resources/logo.png')],
+                    [sg.Text('Newick Tree File:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
+                    [sg.Text('Output Filename:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
+                    [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
+                    [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='support')],
+                    [sg.Checkbox('Plot Histograms', font=('Helvetica 12'), default=False,key='plothist')],
+                    [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
 
-    window = sg.Window('TransmissionCluster', layout)
-    event, values = window.Read()
+        window = sg.Window('TransmissionCluster', layout)
+        event, values = window.Read()
 
-    # parse user arguments
-    # assert float(values['dist']) >= 0, "ERROR: Genertic distance threshold must be at least 0"
-    # assert float(values['dist']) <= 1, "ERROR: Genertic distance threshold must be less than 1"
-    # assert float(values['support']) >= 0 or float(values['support']) == float('-inf'), "ERROR: Branch support threshold must be at least 0"
-    # assert float(values['support']) <= 1, "ERROR: Branch support threshold must be less than 1"
+        # parse user arguments
+        try:
+            float(values['dist'])
+            if float(values['dist']) > 1 or float(values['dist']) < 0:
+                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                passing = False
+            else:
+                passing = True
+        except ValueError:
+            if values['df'] is not True:
+                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                passing = False
+
+        if values['support'] != '':
+            try:
+                float(values['support'])
+                if float(values['support']) > 1 or float(values['support']) < 0:
+                    sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                    passing = False
+                else:
+                    passing = True
+            except ValueError:
+                sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
+                passing = False
+
+        if os.path.exists(values['infilename']) is not True:
+            sg.Popup("Error: Input tree not found.", font=('Helvetica', 12, 'bold'))
+            passing = False
+
 
     infile = open(values['infilename'], 'r')
     outfile = open(values['outfilename'], 'w')
@@ -296,6 +325,8 @@ if __name__ == "__main__":
             visable = True
         if values['df'] is False:
             outfile.write("Genetic Distance Threshold: %s\n" % values['dist'])
+            if visable is True:
+                gen_hist(tree, visable)
             clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
         else:
             histarray = gen_hist(tree, visable)
@@ -322,8 +353,9 @@ if __name__ == "__main__":
         for k in clust_members.keys():
             outfile.write("%s\t%s\t[%s]\n" % (k, len(clust_members[k]), (','.join(clust_members[k]))))
     outfile.close()
+    sg.PopupOK('Process Complete!',
+        'Results have been written to the output file:\n%s' % values['outfilename'],
+        'Plots will now be displayed (if option checked)...', font=('Helvetica', 12))
+
     if visable is True:
         plt.show()
-
-    sg.PopupOK('Process Complete!',
-        'Results have been written to the output file:\n%s' % values['outfilename'], font=('Helvetica', 12))
