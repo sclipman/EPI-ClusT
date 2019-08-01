@@ -13,9 +13,12 @@ from queue import Queue
 from treeswift import read_tree_newick
 import PySimpleGUI as sg
 import os
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import math
 import statistics
+
 
 NUM_THRESH = 1000  # number of thresholds to calculate genetic distance over
 
@@ -274,12 +277,14 @@ def generateEdgeList(distfilename, logfilename):
 
 if __name__ == "__main__":
     # Render GUI window
-    passing = False
+    passingfile = False
+    passingdist = False
+    passingsupp = False
     window = ''
-    while passing is not True:
+    while passingfile is False or passingdist is False or passingsupp is False:
         if window != '':
             window.Close()
-        layout = [[sg.Image('resources/logo.png')],
+        layout = [#[sg.Image('resources/logo.png')],
                     [sg.Text('Newick Tree File:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), key='infilename'), sg.FileBrowse(font=('Helvetica 13'))],
                     [sg.Text('Output Filename:', font=('Helvetica', 13, 'bold')), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
@@ -291,37 +296,39 @@ if __name__ == "__main__":
         event, values = window.Read()
 
         # parse user arguments
+        if os.path.exists(values['infilename']) is not True:
+            sg.Popup("Error: Input tree not found.", font=('Helvetica', 13, 'bold'))
+            passingfile = False
+        else:
+            passingfile = True
         try:
             float(values['dist'])
             if float(values['dist']) > 1 or float(values['dist']) < 0:
                 sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
-                passing = False
+                passingdist = False
             else:
-                passing = True
+                passingdist = True
         except ValueError:
             if values['df'] is not True:
-                sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
-                passing = False
+                sg.Popup("Error: Genetic distance threshold must be between 0 and 1 or 'Compute Best Distance Threshold' must be selected.", font=('Helvetica', 13, 'bold'))
+                passingdist = False
             else:
-                passing = True
+                passingdist = True
 
         if values['support'] != '':
             try:
                 float(values['support'])
                 if float(values['support']) > 1 or float(values['support']) < 0:
                     sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
-                    passing = False
+                    passingsupp = False
                 else:
-                    passing = True
+                    passingsupp = True
             except ValueError:
                 sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 13, 'bold'))
-                passing = False
+                passingsupp = False
         else:
-            passing = True
+            passingsupp = True
 
-        if os.path.exists(values['infilename']) is not True:
-            sg.Popup("Error: Input tree not found.", font=('Helvetica', 13, 'bold'))
-            passing = False
 
     infile = open(values['infilename'], 'r')
     outfile = open(values['outfilename'], 'w')
