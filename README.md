@@ -10,10 +10,16 @@
 
   >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all biologically meaningful thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*). The upper limit *d* is determined by plotting a histogram of sample pairwise distances and selecting the maximum distance that represents the tail end of the distribution of *within* subtype distances (versus *between* subtype pairwise distances) as this represents the upper limit of a epidemiologically meaningful threshold.
 
-## Usage
+## Installation & Usage
 
+  **For MacOS Users:**
+  - An executable file will all dependencies bundled can be found in `/dist`.
+  - Right-click and select 'Open' to run.
+  - If the executable does not behave as expected follow general installation below.
+
+  **General Installation and Execution:**
   1. Clone or download this repository.
-  2. Ensure that all dependencies are installed (see below).
+  2. Ensure that Python3 and all dependencies are installed (see below).
   3. Run using one of the following terminal commands:
   - `./TransmissionCluster.py`
   - `python3 TransmissionCluster.py`
@@ -39,7 +45,7 @@
     - Install via pip: `pip install treeswift`
   * [PySimpleGUI](https://pypi.org/project/PySimpleGUI/)
     - Install via pip: `pip install pysimplegui`
-  * Matplotlib
+  * [Matplotlib](https://matplotlib.org/3.1.1/index.html)
     - Install via pip: `pip install matplotlib`
 
 
