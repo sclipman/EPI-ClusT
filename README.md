@@ -1,16 +1,13 @@
 # TransmissionCluster (Beta)
   TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
 
-  Given a Newick (.nwk) formatted tree, genetic distance threshold *d*, and an optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
+  Given a Newick (.nwk) formatted tree, an optional genetic distance threshold *d* and optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
 
   1. The maximum pairwise distance between samples in the cluster is at most *d*.\*
   2. Samples cannot be connected by branches with support less than or equal to *s*.
   3. The samples in the cluster must define a clade in the tree.
 
-  For a tree with *n* samples, the algorithm is O(*n*).
-
-  >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*).
-  The upper limit *d* is determined by plotting a histogram of pairwise distances and selecting the maximum distance that represents upper end of the distribution of within subtype pairwise-distance versus between subtype distances.
+  >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all biologically meaningful thresholds from 0 to *d* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *d*). The upper limit *d* is determined by plotting a histogram of sample pairwise distances and selecting the maximum distance that represents the tail end of the distribution of *within* subtype distances (versus *between* subtype pairwise distances) as this represents the upper limit of a epidemiologically meaningful threshold.
 
 ## Usage
 
@@ -45,6 +42,6 @@
     - Install via pip: `pip install matplotlib`
 
 
- 
+
 ### Acknowledgements
 TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster).
