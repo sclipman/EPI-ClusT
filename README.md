@@ -13,7 +13,7 @@
 ## Installation & Usage
 
   **For MacOS Users:**
-  - An executable file will all dependencies bundled can be found in `/dist`.
+  - An executable file with all dependencies bundled can be found in `/dist`.
   - Right-click and select 'Open' to run.
   - If the executable does not behave as expected follow general installation below.
 
