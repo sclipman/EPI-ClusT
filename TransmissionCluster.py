@@ -123,25 +123,28 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
     best_num = -1
     best_t = -1
     distv = []
+    xs = []
+    ys = []
     for i, t in enumerate(thresholds):
         sg.OneLineProgressMeter('TransmissionCluster', i+1, len(thresholds)-1, 'key', 'Computing best genetic distance threshold...', orientation='h')
         clusters = method(deepcopy(tree), t, support)
         num_non_singleton = len([c for c in clusters if len(c) > 1])
         if display_fig is True:
             distfile.write("%s\t%s\n" % (t, num_non_singleton))
-        distv.extend([t]*num_non_singleton)
+        xs.append(float(t))
+        ys.append(int(num_non_singleton))
         if num_non_singleton > best_num:
             best = clusters
             best_num = num_non_singleton
-            best_t = round(t, 3)
-    outfile.write("Genetic Distance Uperbound: %f\n" % threshold)
-    outfile.write("Best Distance Threshold: %f\n" % best_t)
+            raw_t = t
+            best_t = float(round(t, 3))
+    outfile.write("Genetic Distance Uperbound: %s\n" % threshold)
+    outfile.write("Best Distance Threshold: %s\n" % best_t)
 
     if display_fig is True:
         distfile.close()
-        bin_size = round(math.sqrt(len(distv)))
         plt.figure(2)
-        plt.hist(distv, bins=bin_size)
+        plt.bar(xs, ys, width=0.001)
         plt.ylabel('Number of Clusters')
         plt.xlabel('Genetic Distance Threshold')
 
@@ -291,7 +294,7 @@ if __name__ == "__main__":
                     [sg.Text('Output Filename*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
                     [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
-                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=False, key='plothist')],
+                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=True, key='plothist')],
                     [sg.OK('Analyze', font=('Helvetica', 13), size=(10, 2))]]
 
         window = sg.Window('TransmissionCluster', layout)
