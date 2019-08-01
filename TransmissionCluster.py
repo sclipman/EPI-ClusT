@@ -5,6 +5,10 @@ import PySimpleGUI as sg
 import os
 import matplotlib.pyplot as plt
 import math
+import numpy as np
+import statistics
+
+
 NUM_THRESH = 1000  # number of thresholds for the threshold-free methods to use
 
 
@@ -108,7 +112,7 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
             distfile.write("%s\t%s\n" % (t, num_non_singleton))
         distv.extend([t]*num_non_singleton)
         if num_non_singleton > best_num:
-            best = clusters; best_num = num_non_singleton; best_t = t
+            best = clusters; best_num = num_non_singleton; best_t = round(t,3)
     outfile.write("Genetic Distance Uperbound: %f\n" % threshold)
     outfile.write("Best Distance Threshold: %f\n" % best_t)
 
@@ -116,19 +120,18 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
         distfile.close()
         bin_size = round(math.sqrt(len(distv)))
         plt.figure(2)
-        plt.hist(distv, bins = bin_size)
-        plt.ylabel('Number of Clusters'); plt.xlabel('Genetic Distance Threshold')
-
-
+        plt.hist(distv, bins=bin_size)
+        plt.ylabel('Number of Clusters')
+        plt.xlabel('Genetic Distance Threshold')
 
     return best
 
 
 def gen_hist(tree, display_fig):
     if display_fig is True:
-        histfile = open("TransmissionCluster_PlotData_Pairwise_Distance_Histogram.txt",'w')
+        histfile = open("TransmissionCluster_PlotData_Pairwise_Distance_Histogram.txt", 'w')
     pw_dists = []
-    distance_matrix = tree.distance_matrix(leaf_labels = True)
+    distance_matrix = tree.distance_matrix(leaf_labels=True)
     for u in distance_matrix.keys():
         for v in distance_matrix[u].keys():
             pw_dists.append(distance_matrix[u][v])
@@ -137,32 +140,31 @@ def gen_hist(tree, display_fig):
 
     bin_size = int(math.ceil(math.sqrt(len(pw_dists)) / 10.0)) * 10
     plt.figure(1)
-    plt.hist(pw_dists, bins = bin_size)
-    plt.ylabel('Count'); plt.xlabel('Sample Pairwise Genetic Distance')
-    histarray = plt.hist(pw_dists, bins = bin_size)[0]
-    binsarray = plt.hist(pw_dists, bins = bin_size)[1]
+    plt.hist(pw_dists, bins=bin_size)
+    plt.ylabel('Count')
+    plt.xlabel('Sample Pairwise Genetic Distance')
+    histarray = plt.hist(pw_dists, bins=bin_size)[0]
+    binsarray = plt.hist(pw_dists, bins=bin_size)[1]
     if display_fig is True:
         histfile.close()
     return histarray, binsarray
 
 
 # get upper limit for computing genetic distance thresholds
-def getD(hp):
-    histarray = hp[0]
-    binsarray = hp[1]
-    zerodic = {}
-    for i in range(len(histarray)):
-        if int(histarray[i]) == 0:
-            zerodic[i] = 1
-            if i >= 1:
-                j = i-1
-                if j in zerodic and zerodic[j] >= 1:
-                    zerodic[i] = zerodic[j] + 1
+def get_dist_limit(hist_plot):
+    histarray = hist_plot[0]
+    binsarray = hist_plot[1]
+    ff = histarray[:5]
+    meanff = statistics.mean(ff)
+    maxarray = []
+    for i in range(5, len(histarray)):
+        curSet = histarray[i-5:i]
+        if statistics.mean(curSet) < meanff:
+            maxarray.append(binsarray[i])
 
-    m = int(max(zerodic, key=zerodic.get))
-    n = m - zerodic[m]
-    d = round(binsarray[n],4)
-    return float(d)
+    d = round(float(maxarray[1]),3)
+
+    return d
 
 
 # generate edge list to visualize clusters in gephi
@@ -253,12 +255,12 @@ def generateEdgeList(distfilename, logfilename):
 
 
 if __name__ == "__main__":
-    #GUI
+    #Render GUI window
     layout = [ [sg.Image('resources/logo.png')],
-                [sg.Text('Newick Tree File:', font=('Helvetica 12')), sg.InputText(key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
-                [sg.Text('Output Filename:', font=('Helvetica 12')), sg.InputText(default_text='TransmissionCluster_Results.txt', key='outfilename')],
-                [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
-                [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(key='support')],
+                [sg.Text('Newick Tree File:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), key='infilename'), sg.FileBrowse(font=('Helvetica 12'))],
+                [sg.Text('Output Filename:', font=('Helvetica', 12, 'bold')), sg.InputText(font=('Helvetica 12'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
+                [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 12'), default=False,key='df')],
+                [sg.Text('Support Threshold (optional):', font=('Helvetica 12')), sg.InputText(font=('Helvetica 12'), key='support')],
                 [sg.Checkbox('Plot Histograms', font=('Helvetica 12'), default=False,key='plothist')],
                 [sg.OK(font=('Helvetica 12')), sg.Cancel('Quit',font=('Helvetica 12'))] ]
 
@@ -297,7 +299,7 @@ if __name__ == "__main__":
             clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
         else:
             histarray = gen_hist(tree, visable)
-            d = getD(histarray)
+            d = get_dist_limit(histarray)
             clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
         cluster_num = 1
         clust_members = {}
@@ -323,4 +325,5 @@ if __name__ == "__main__":
     if visable is True:
         plt.show()
 
-    sg.PopupOK('Process Complete!\nResults have been written to the output file.')
+    sg.PopupOK('Process Complete!',
+        'Results have been written to the output file:\n%s' % values['outfilename'], font=('Helvetica', 12))
