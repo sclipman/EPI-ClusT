@@ -44,6 +44,7 @@
   * Matplotlib
     - Install via pip: `pip install matplotlib`
 
-\n
+
+ 
 ### Acknowledgements
 TransmissionCluster builds upon methodology from [TreeCluster](https://github.com/niemasd/TreeCluster).
