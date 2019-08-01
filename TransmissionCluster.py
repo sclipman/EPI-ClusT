@@ -284,6 +284,8 @@ if __name__ == "__main__":
             if values['df'] is not True:
                 sg.Popup("Error: Genetic distance threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
                 passing = False
+            else:
+                passing = True
 
         if values['support'] != '':
             try:
@@ -296,6 +298,8 @@ if __name__ == "__main__":
             except ValueError:
                 sg.Popup("Error: Support threshold must be between 0 and 1.", font=('Helvetica', 12, 'bold'))
                 passing = False
+        else:
+            passing = True
 
         if os.path.exists(values['infilename']) is not True:
             sg.Popup("Error: Input tree not found.", font=('Helvetica', 12, 'bold'))
