@@ -1,5 +1,5 @@
 ![logo](./resources/logo.png)
-## (Beta)
+## v1.0
   TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
 
   Given a Newick (.nwk) formatted tree, an optional genetic distance threshold *d* and optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
