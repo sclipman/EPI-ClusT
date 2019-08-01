@@ -1,3 +1,4 @@
+![logo](./resources/logo.png)
 # TransmissionCluster (Beta)
   TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
 
