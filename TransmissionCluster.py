@@ -114,6 +114,7 @@ def min_clusters_threshold_max_clade(tree, threshold, support):
 
 # pick the threshold between 0 and "distance threshold" that maximizes number of (non-singleton) clusters
 def argmax_clusters(method, tree, threshold, support, display_fig):
+    supportTemp = float('-inf')
     if display_fig is True:
         distfile = open("TransmissionCluster_PlotData_NumClusters_by_DistanceThreshold.txt", 'w')
         distfile.write("Distance\tNumClusters\n")
@@ -127,7 +128,7 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
     ys = []
     for i, t in enumerate(thresholds):
         sg.OneLineProgressMeter('TransmissionCluster', i+1, len(thresholds)-1, 'key', 'Computing best genetic distance threshold...', orientation='h')
-        clusters = method(deepcopy(tree), t, support)
+        clusters = method(deepcopy(tree), t, supportTemp)
         num_non_singleton = len([c for c in clusters if len(c) > 1])
         if display_fig is True:
             distfile.write("%s\t%s\n" % (t, num_non_singleton))
@@ -138,6 +139,7 @@ def argmax_clusters(method, tree, threshold, support, display_fig):
             best_num = num_non_singleton
             raw_t = t
             best_t = float(round(t, 3))
+    best = method(deepcopy(tree), best_t, support)
     outfile.write("Genetic Distance Uperbound: %s\n" % threshold)
     outfile.write("Best Distance Threshold: %s\n" % best_t)
 
@@ -193,89 +195,28 @@ def get_dist_limit(hist_plot):
 
 
 # generate edge list to visualize clusters in gephi
-def generateEdgeList(distfilename, logfilename):
-    outname = "network_diagram_edge_list.txt"
-    logfile = open(logfilename, 'r')
+def generate_edge_list(tree, cluster_members):
+    outname = "TransmissionCluster_Network_Diagram_Edge_List.txt"
     outfile = open(outname, 'w')
-    distfile = open(distfilename, 'r')
-
-    dline = distfile.readline()
-    while dline[:7] != 'Species':
-        dline = distfile.readline()
-    dline = distfile.readline()
-
-    distdic = {}
-    while dline[:5] != 'Table':
-        data = dline.split()
-        id = data[0] + '-' + data[1]
-        distdic[id] = data[2]
-        dline = distfile.readline()
-
-    distfile.close()
-
-    line = logfile.readline()
-    while line != 'ClusterNum\tNumberOfSamples\tSampleNames\n':
-        line = logfile.readline()
-
-    line = logfile.readline()
-
-    while line != '':
-        clusteredSamples = line[line.index("[")+1:line.index("]")]
-        clusteredSamples = clusteredSamples.split(',')
-        if len(clusteredSamples) == 2:
-            writeline = clusteredSamples[0] + '\t' + clusteredSamples[1] + '\n'
+    outfile.write("Source\tTarget\n")
+    distance_matrix = tree.distance_matrix(leaf_labels=True)
+    for cluster_num in cluster_members.keys():
+        clustered_samples = cluster_members[cluster_num]
+        if len(clustered_samples) == 2:
+            outfile.write("%s\t%s\n" % (clustered_samples[0], clustered_samples[1]))
         else:
-            for i in range(len(clusteredSamples)):
-                for j in range(i+1, len(clusteredSamples)):
-                    id1 = clusteredSamples[i] + '-' + clusteredSamples[j]
-                    id2 = clusteredSamples[j] + '-' + clusteredSamples[i]
-                    if id1 in distdic:
-                        distance = distdic[id1]
-                    elif id2 in distdic:
-                        distance = distdic[id2]
-
-                    writeline = clusteredSamples[i] + '\t' + clusteredSamples[j] + '\t' + distance + '\n'
-                    outfile.write(writeline)
-
-        line = logfile.readline()
-
-    logfile.close()
+            for i in range(len(clustered_samples)):
+                id1 = clustered_samples[i]
+                dist = 1000
+                edgeTo = ''
+                for j in range(i+1, len(clustered_samples)):
+                    id2 = clustered_samples[j]
+                    if distance_matrix[id1][id2] < dist:
+                        dist = distance_matrix[id1][id2]
+                        edgeTo = id2
+                if edgeTo != '':
+                    outfile.write('%s\t%s\n' % (id1, edgeTo))
     outfile.close()
-
-    rawedgelist = open(outname, 'r')
-    newoutname = outname + "_filtered"
-    newout = open(newoutname, 'w')
-    newout.write("Source\tTarget\n")
-    line = rawedgelist.readline()
-    cdic = {}
-    while line != '':
-        data = line.split()
-        if len(data) == 2:
-            newout.write(line)
-        else:
-            id1 = data[0]
-            id2 = data[1]
-            dist = float(data[2])
-            infocols = [id2, dist]
-            if id1 not in cdic:
-                cdic[id1] = infocols
-            else:
-                curdata = cdic[id1]
-                curdist = float(curdata[1])
-                if curdist > dist:
-                    cdic[id1] = infocols
-
-        line = rawedgelist.readline()
-
-    rawedgelist.close()
-
-    for key in cdic.keys():
-        ol = key + '\t' + cdic[key][0] + '\n'
-        newout.write(ol)
-
-    newout.close()
-    os.system("rm network_diagram_edge_list.txt")
-    os.system("mv network_diagram_edge_list.txt_filtered network_diagram_edgeList.txt")
 
 
 if __name__ == "__main__":
@@ -294,7 +235,7 @@ if __name__ == "__main__":
                     [sg.Text('Output Filename*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
                     [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
-                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=True, key='plothist')],
+                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=True, key='plothist'), sg.Checkbox('Export Network Edge List', font=('Helvetica 13'), default=False, key='edge')],
                     [sg.OK('Analyze', font=('Helvetica', 13), size=(10, 2))]]
 
         window = sg.Window('TransmissionCluster', layout)
@@ -383,9 +324,14 @@ if __name__ == "__main__":
         outfile.write('Found %s clusters\n\n' % cluster_num)
         header = "ClusterNum\tNumberOfSamples\tSampleNames\n"
         outfile.write(header)
+        total = 0
         for k in clust_members.keys():
+            total += len(clust_members[k])
             outfile.write("%s\t%s\t[%s]\n" % (k, len(clust_members[k]), (','.join(clust_members[k]))))
+        outfile.write("\n-------------------------------\nTotal Samples Clustered: %s" % total)
     outfile.close()
+    if values['edge'] is True:
+        generate_edge_list(tree, clust_members)
     sg.PopupOK('Process Complete!',
         'Results have been written to the output file:\n%s' % values['outfilename'],
         'Plots will now be displayed (if option checked)...', font=('Helvetica', 13))
