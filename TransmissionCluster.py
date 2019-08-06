@@ -113,7 +113,7 @@ def min_clusters_threshold_max_clade(tree, threshold, support):
 
 
 # pick the threshold between 0 and "distance threshold" that maximizes number of (non-singleton) clusters
-def argmax_clusters(method, tree, threshold, support, display_fig):
+def auto_cluster(method, tree, threshold, support, display_fig):
     supportTemp = float('-inf')
     if display_fig is True:
         distfile = open("TransmissionCluster_PlotData_NumClusters_by_DistanceThreshold.txt", 'w')
@@ -159,7 +159,10 @@ def gen_hist(tree, display_fig):
         histfile = open("TransmissionCluster_PlotData_Pairwise_Distance_Histogram.txt", 'w')
     pw_dists = []
     distance_matrix = tree.distance_matrix(leaf_labels=True)
-    for u in distance_matrix.keys():
+    distance_matrix_keys = list(distance_matrix.keys())
+    for i in range(len(distance_matrix_keys)):
+        u = distance_matrix_keys[i]
+        sg.OneLineProgressMeter('TransmissionCluster', i+1, len(distance_matrix_keys)-1, 'key', 'Analyzing pairwise distances...', orientation='h')
         for v in distance_matrix[u].keys():
             pw_dists.append(distance_matrix[u][v])
             if display_fig is True:
@@ -185,12 +188,15 @@ def get_dist_limit(hist_plot):
     meanff = statistics.mean(ff)
     maxarray = []
     for i in range(5, len(histarray)):
+        sg.OneLineProgressMeter('TransmissionCluster', i+1, len(histarray)-1, 'key', 'Getting distance upperbound...', orientation='h')
         curSet = histarray[i-5:i]
         if statistics.mean(curSet) < meanff:
             maxarray.append(binsarray[i])
 
-    d = round(float(maxarray[1]), 3)
-
+    if len(maxarray) >= 1:
+        d = round(float(maxarray[0]), 3)
+    else:
+        d = 0.25
     return d
 
 
@@ -215,7 +221,7 @@ def generate_edge_list(tree, cluster_members):
                         dist = distance_matrix[id1][id2]
                         edgeTo = id2
                 if edgeTo != '':
-                    outfile.write('%s\t%s\n' % (id1, edgeTo))
+                    outfile.write('%s\t%s\n' % (edgeTo, id1))
     outfile.close()
 
 
@@ -305,7 +311,7 @@ if __name__ == "__main__":
         else:
             histarray = gen_hist(tree, visable)
             d = get_dist_limit(histarray)
-            clusters = argmax_clusters(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
+            clusters = auto_cluster(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
         cluster_num = 1
         clust_members = {}
         for cluster in clusters:
