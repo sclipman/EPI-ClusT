@@ -10,7 +10,8 @@
 
 
   \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all biologically meaningful thresholds from 0 to *dMax* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *dMax*). The upper limit *dMax* is determined by plotting a histogram of sample pairwise distances and selecting the maximum distance that represents the tail end of the distribution of *within* subtype distances (versus *between* subtype pairwise distances) as this represents the upper limit of an epidemiologically meaningful threshold.
-  *Note:* Automatic determination of the distance upperbound (*dMax*) is currently disabled and will be coming in a future update. It is currently recommended that one specify *dMax* using the first local minimum from the histogram of pairwise distances.
+
+  >Note: Automatic determination of the distance upperbound (*dMax*) is currently disabled and will be coming in a future update. It is currently recommended that one specify *dMax* using the first local minimum from the histogram of pairwise distances.
 
 ## Installation & Usage
 

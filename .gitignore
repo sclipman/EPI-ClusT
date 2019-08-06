@@ -4,5 +4,5 @@ build
 __pycache__
 TransmissionCluster.spec
 FAVITES
-
+*.xlsx
 *.txt
