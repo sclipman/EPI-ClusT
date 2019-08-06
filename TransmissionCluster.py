@@ -18,6 +18,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import math
 import statistics
+import numpy
 
 
 NUM_THRESH = 1000  # number of thresholds to calculate genetic distance over
@@ -180,25 +181,11 @@ def gen_hist(tree, display_fig):
     return histarray, binsarray
 
 
-# get upper limit for computing genetic distance thresholds
-def get_dist_limit(hist_plot):
-    histarray = hist_plot[0]
-    binsarray = hist_plot[1]
-    ff = histarray[:5]
-    meanff = statistics.mean(ff)
-    maxarray = []
-    for i in range(5, len(histarray)):
-        sg.OneLineProgressMeter('TransmissionCluster', i+1, len(histarray)-1, 'key', 'Getting distance upperbound...', orientation='h')
-        curSet = histarray[i-5:i]
-        if statistics.mean(curSet) < meanff:
-            maxarray.append(binsarray[i])
 
-    if len(maxarray) >= 1:
-        d = round(float(maxarray[0]), 3)
-    else:
-        d = 0.25
-    return d
-
+# # get upper limit for computing genetic distance thresholds
+# def get_dist_limit(hist_plot):
+#     histarray = hist_plot[0]
+#     binsarray = hist_plot[1]
 
 # generate edge list to visualize clusters in gephi
 def generate_edge_list(tree, cluster_members):
@@ -234,7 +221,7 @@ if __name__ == "__main__":
     while passingfile is False or passingdist is False or passingsupp is False:
         if window != '':
             window.Close()
-        layout = [#[sg.Image(r'resources/logo.png')],
+        layout = [
                     [sg.Text("TransmissionCluster", font=('Helvetica', 24, 'bold'))],
                     [sg.Text("Written By: Steven J. Clipman, Johns Hopkins University\n", font=('Helvetica', 14))],
                     [sg.Text('Newick Tree File*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), key='infilename'), sg.FileBrowse(font=('Helvetica 13'))],
@@ -309,8 +296,10 @@ if __name__ == "__main__":
                 gen_hist(tree, visable)
             clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
         else:
-            histarray = gen_hist(tree, visable)
-            d = get_dist_limit(histarray)
+            d = float(sg.PopupGetText('Enter distance upperbound:\nThe best genetic distance up to this threshold will be computed.',title='Enter Distance Upperbound',default_text="0.25", font=('Helvetica', 13)))
+            if visable is True:
+                histarray = gen_hist(tree, visable)
+        #    d = get_dist_limit(histarray)
             clusters = auto_cluster(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
         cluster_num = 1
         clust_members = {}
