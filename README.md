@@ -35,6 +35,7 @@
     - Specify a threshold or select 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
   - Posterior/Bootstrap Support Threshold
   - Plot Pairwise Distance Histogram
+  - Export Network Edge List
 
 
 ## Screenshots
