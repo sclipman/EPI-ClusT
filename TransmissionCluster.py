@@ -66,6 +66,51 @@ def prep(tree, support):
     return leaves
 
 
+# split leaves into minimum number of clusters such that the maximum leaf pairwise distance is below some threshold
+def min_clusters_threshold_max(tree,threshold,support):
+    leaves = prep(tree,support)
+    clusters = list()
+    for node in tree.traverse_postorder():
+        # if I've already been handled, ignore me
+        if node.DELETED:
+            continue
+
+        # find my undeleted max distances to leaf
+        if node.is_leaf():
+            node.left_dist = 0; node.right_dist = 0
+        else:
+            children = list(node.children)
+            if children[0].DELETED and children[1].DELETED:
+                cut(node); continue
+            if children[0].DELETED:
+                node.left_dist = 0
+            else:
+                node.left_dist = max(children[0].left_dist,children[0].right_dist) + children[0].edge_length
+            if children[1].DELETED:
+                node.right_dist = 0
+            else:
+                node.right_dist = max(children[1].left_dist,children[1].right_dist) + children[1].edge_length
+
+            # if my kids are screwing things up, cut out the longer one
+            if node.left_dist + node.right_dist > threshold:
+                if node.left_dist > node.right_dist:
+                    cluster = cut(children[0])
+                    node.left_dist = 0
+                else:
+                    cluster = cut(children[1])
+                    node.right_dist = 0
+
+                # add cluster
+                if len(cluster) != 0:
+                    clusters.append(cluster)
+                    for leaf in cluster:
+                        leaves.remove(leaf)
+
+    # add all remaining leaves to a single cluster
+    if len(leaves) != 0:
+        clusters.append(list(leaves))
+    return clusters
+
 # min_clusters_threshold_max, but all clusters must define a clade
 def min_clusters_threshold_max_clade(tree, threshold, support):
     leaves = prep(tree, support)
@@ -181,12 +226,6 @@ def gen_hist(tree, display_fig):
     return histarray, binsarray
 
 
-
-# # get upper limit for computing genetic distance thresholds
-# def get_dist_limit(hist_plot):
-#     histarray = hist_plot[0]
-#     binsarray = hist_plot[1]
-
 # generate edge list to visualize clusters in gephi
 def generate_edge_list(tree, cluster_members):
     outname = "TransmissionCluster_Network_Diagram_Edge_List.txt"
@@ -228,7 +267,7 @@ if __name__ == "__main__":
                     [sg.Text('Output Filename*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
                     [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
-                    [sg.Checkbox('Plot Histograms', font=('Helvetica 13'), default=True, key='plothist'), sg.Checkbox('Export Network Edge List', font=('Helvetica 13'), default=False, key='edge')],
+                    [sg.Checkbox('Plot Histogram(s)', font=('Helvetica 13'), default=True, key='plothist'), sg.Checkbox('Export Network Edge List', font=('Helvetica 13'), default=False, key='edge'), sg.Checkbox('Rooted Tree: Use Clade Support', font=('Helvetica 13'), default=False, key='rooted')],
                     [sg.OK('Analyze', font=('Helvetica', 13), size=(10, 2))]]
 
         window = sg.Window('TransmissionCluster', layout)
@@ -286,21 +325,24 @@ if __name__ == "__main__":
     outfile.write("Input File: %s\n" % values['infilename'])
     outfile.write("Support Threshold: %s\n" % values['support'])
     for t, tree in enumerate(trees):
+        gen_hist(tree, True)
+        plt.show(block=False)
         # plot pairwise distances
         visable = False
         if values['plothist'] is True:
             visable = True
         if values['df'] is False:
             outfile.write("Genetic Distance Threshold: %s\n" % values['dist'])
-            if visable is True:
-                gen_hist(tree, visable)
-            clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
+            if values['rooted'] is True:
+                clusters = min_clusters_threshold_max_clade(tree, float(values['dist']), float(values['support']))
+            else:
+                clusters = min_clusters_threshold_max(tree, float(values['dist']), float(values['support']))
         else:
-            d = float(sg.PopupGetText('Enter distance upperbound:\nThe best genetic distance up to this threshold will be computed.',title='Enter Distance Upperbound',default_text="0.25", font=('Helvetica', 13)))
-            if visable is True:
-                histarray = gen_hist(tree, visable)
-        #    d = get_dist_limit(histarray)
-            clusters = auto_cluster(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
+            d = float(sg.PopupGetText('Enter distance upperbound:\nThe best genetic distance up through this threshold will be computed.',title='Enter Distance Upperbound',default_text="0.25", font=('Helvetica', 13)))
+            if values['rooted'] is True:
+                clusters = auto_cluster(min_clusters_threshold_max_clade, tree, float(d), float(values['support']), visable)
+            else:
+                clusters = auto_cluster(min_clusters_threshold_max, tree, float(d), float(values['support']), visable)
         cluster_num = 1
         clust_members = {}
         for cluster in clusters:
