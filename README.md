@@ -36,7 +36,7 @@
   - Genetic Distance Threshold
     - Specify a threshold or select 'Compute Best Distance Threshold' (when unchecked TransmissionCluster uses the specified threshold)
   - Posterior/Bootstrap Support Threshold
-  - Plot Pairwise Distance Histogram
+  - Plot Clusters Histogram (i.e. number of clusters over distance thresholds)
   - Export Network Edge List
   - Rooted Tree: Use Clade Support
 
