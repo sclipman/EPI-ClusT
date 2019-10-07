@@ -267,7 +267,7 @@ if __name__ == "__main__":
                     [sg.Text('Output Filename*:', font=('Helvetica', 13)), sg.InputText(font=('Helvetica 13'), default_text='TransmissionCluster_Results.txt', text_color='gray', key='outfilename')],
                     [sg.Text('Genetic Distance Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='dist'), sg.Checkbox('Compute Best Distance Threshold', font=('Helvetica 13'), default=False, key='df')],
                     [sg.Text('Support Threshold (optional):', font=('Helvetica 13')), sg.InputText(font=('Helvetica 13'), key='support')],
-                    [sg.Checkbox('Plot Histogram(s)', font=('Helvetica 13'), default=True, key='plothist'), sg.Checkbox('Export Network Edge List', font=('Helvetica 13'), default=False, key='edge'), sg.Checkbox('Rooted Tree: Use Clade Support', font=('Helvetica 13'), default=False, key='rooted')],
+                    [sg.Checkbox('Plot Clusters Histogram', font=('Helvetica 13'), default=True, key='plothist'), sg.Checkbox('Export Network Edge List', font=('Helvetica 13'), default=False, key='edge'), sg.Checkbox('Rooted Tree: Use Clade Support', font=('Helvetica 13'), default=False, key='rooted')],
                     [sg.OK('Analyze', font=('Helvetica', 13), size=(10, 2))]]
 
         window = sg.Window('TransmissionCluster', layout)
@@ -325,8 +325,9 @@ if __name__ == "__main__":
     outfile.write("Input File: %s\n" % values['infilename'])
     outfile.write("Support Threshold: %s\n" % values['support'])
     for t, tree in enumerate(trees):
-        gen_hist(tree, True)
-        plt.show(block=False)
+        if values['df'] is True:
+            gen_hist(tree, True)
+            plt.show(block=False)
         # plot pairwise distances
         visable = False
         if values['plothist'] is True:
@@ -369,9 +370,7 @@ if __name__ == "__main__":
     outfile.close()
     if values['edge'] is True:
         generate_edge_list(tree, clust_members)
-    sg.PopupOK('Process Complete!',
-        'Results have been written to the output file:\n%s' % values['outfilename'],
-        'Plots will now be displayed (if option checked)...', font=('Helvetica', 13))
-
     if visable is True:
-        plt.show()
+        plt.show(block=False)
+    sg.PopupOK('Process Complete!',
+        'Results have been written to the output file:\n%s' % values['outfilename'], font=('Helvetica', 13, 'bold'))
