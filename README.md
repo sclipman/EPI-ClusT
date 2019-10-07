@@ -1,17 +1,16 @@
 ![logo](./resources/logo.png)
 ## v1.0
-  TransmissionCluster is a GUI Python program that computes the optimal genetic distance threshold and identifies clusters in a phylogenetic tree.
+  TransmissionCluster is a GUI Python program that helps researchers compute the optimal genetic distance threshold and identify clusters in a phylogenetic tree.
 
   Given a Newick (.nwk) formatted tree, an optional genetic distance threshold *d* and optional support threshold *s*, TransmissionCluster finds the minimum number of clusters of samples in the tree such that:
 
   1. The maximum pairwise distance between samples in the cluster is at most *d*.\*
   2. Samples cannot be connected by branches with support less than or equal to *s*.
+
+  And when optionally given a rooted tree:
   3. The samples in the cluster must define a clade in the tree.
 
-
-  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all biologically meaningful thresholds from 0 to *dMax* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *dMax*). The upper limit *dMax* is determined by plotting a histogram of sample pairwise distances and selecting the maximum distance that represents the tail end of the distribution of *within* subtype distances (versus *between* subtype pairwise distances) as this represents the upper limit of an epidemiologically meaningful threshold.
-
-  >Note: Automatic determination of the distance upperbound (*dMax*) is currently disabled and will be coming in a future update. It is currently recommended that one specify *dMax* using the first local minimum from the histogram of pairwise distances.
+  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all meaningful thresholds from 0 to *dMax* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *dMax*). The upper limit *dMax* is specified by the user. TransmissionCluster first plots a histogram of sample pairwise distances and the user is prompted to select *dMax* from the first local minimum i.e. the tail of the first peak (which corresponds to the pairwise distances of the most closely related samples) as this represents the upper limit of an epidemiologically meaningful threshold for clustering.
 
 ## Installation & Usage
 
@@ -30,7 +29,7 @@
   **Required Parameters:**
   - A Newick formatted phylogenetic tree (.nwk)
   - Output Filename
-    - Note: When using the distance-free method this threshold is used as the upper bound of possible thresholds to compute.
+  - Note: When using the distance-free method *dMax* is required. This threshold is used as the upper bound of possible thresholds to compute.
 
   **Optional Parameters:**
   - Genetic Distance Threshold
@@ -38,6 +37,7 @@
   - Posterior/Bootstrap Support Threshold
   - Plot Pairwise Distance Histogram
   - Export Network Edge List
+  - Rooted Tree: Use Clade Support
 
 
 ## Screenshots
@@ -54,5 +54,5 @@
 
 
 
-### Acknowledgements
+### Acknowledgements and Clustering Algorithm
 TransmissionCluster utilizes the "Max Clade" algorithm from [TreeCluster](https://github.com/niemasd/TreeCluster).
