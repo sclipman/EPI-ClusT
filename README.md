@@ -8,9 +8,10 @@
   2. Samples cannot be connected by branches with support less than or equal to *s*.
 
   And when optionally given a rooted tree:
+
   3. The samples in the cluster must define a clade in the tree.
 
-  \*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all meaningful thresholds from 0 to *dMax* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *dMax*). The upper limit *dMax* is specified by the user. TransmissionCluster first plots a histogram of sample pairwise distances and the user is prompted to select *dMax* from the first local minimum i.e. the tail of the first peak (which corresponds to the pairwise distances of the most closely related samples) as this represents the upper limit of an epidemiologically meaningful threshold for clustering.
+  >\*TransmissionCluster can compute the distance threshold that maximizes the number of non-singleton clusters over all meaningful thresholds from 0 to *dMax* in steps of 0.0001 (i.e., 0, 0.001, 0.002, ..., *dMax*). The upper limit *dMax* is specified by the user. TransmissionCluster first plots a histogram of sample pairwise distances and the user is prompted to select *dMax* from the first local minimum i.e. the tail of the first peak (which corresponds to the pairwise distances of the most closely related samples) as this represents the upper limit of an epidemiologically meaningful threshold for clustering.
 
 ## Installation & Usage
 
