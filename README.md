@@ -1,5 +1,5 @@
 ![logo](./resources/logo.png)
-## v1.0
+## Empirical Phylogeny Informed Cluster Tool (EPI-ClusT) v1.0
   EPI-ClusT is a GUI Python program that helps researchers compute the optimal genetic distance threshold and identify clusters in a phylogenetic tree.
 
   Given a Newick `.nwk` formatted tree, an optional genetic distance threshold *d* and optional support threshold *s*, EPI-ClusT finds the minimum number of clusters of samples in the tree such that:
