@@ -2,7 +2,9 @@ dev
 venv
 build
 __pycache__
-TransmissionCluster.spec
+EPI-ClusT.spec
 FAVITES
 *.xlsx
 *.txt
+helper_scripts
+logo_old.png
