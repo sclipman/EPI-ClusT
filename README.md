@@ -55,5 +55,5 @@
 
 
 
-## Acknowledgements and Clustering Algorithm
+## Clustering Algorithm
 EPI-ClusT utilizes the "Max Clade" algorithm from [TreeCluster](https://github.com/niemasd/TreeCluster).
