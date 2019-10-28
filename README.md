@@ -59,6 +59,6 @@
 EPI-ClusT utilizes the "Max Clade" algorithm from [TreeCluster](https://github.com/niemasd/TreeCluster).
 
 
-### Disclaimer
+## Disclaimer
 This software is supplied 'as-is', with no warranty of any kind expressed or implied. The author has made a reasonable effort to avoid errors in design and execution of this software, but will not be liable for its use or misuse. The user is solely responsible for the validity of any results generated. Specifically, the author is not liable for any damage or data loss resulting from the use of this software, even if it is due to negligence on the part of the author of this software.
 This software and this document are the responsibility of Steven J. Clipman, PhDc, MSPH. The views expressed herein do not necessarily represent the views of Johns Hopkins University.
